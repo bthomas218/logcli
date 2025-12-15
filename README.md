@@ -44,7 +44,7 @@ logcli analyze path/to/log.jsonl
 
 #### flags
 
-- `--since`, `--until` (string timestamps)
+- `--since`, `--until` (string timestamps in ISO 8601)
 - `--severity` (space separated list)
 - `--service` (space seperated list)
 - `--output` in `["table", "json"]`

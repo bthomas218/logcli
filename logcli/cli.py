@@ -1,6 +1,9 @@
 import argparse
 from pathlib import Path
+from datetime import datetime
 from reader import FileLogReader, StdinLogReader
+from filters import filter_by_service, filter_by_severity, filter_until, filter_since
+
 
 # Definition for main CLI
 parser = argparse.ArgumentParser(prog="logcli", description="A tool that analyzes logs")
@@ -27,13 +30,44 @@ def _print_verbose(args):
 
     print("\n".join(messages))
 
+# process and validate user input for analyze command
+def _process_args(args):
+    if args.since:
+        try:
+            args.since = datetime.fromisoformat(args.since)
+        except ValueError:
+            print("Error: Invalid timestamp for since flag")
+            exit(1)
+    if args.until:
+        try:
+            args.until = datetime.fromisoformat(args.until)
+        except ValueError:
+            print("Error: Invalid timestamp for until flag")
+            exit(1)
+    if args.service:
+        args.service = {service.lower() for service in args.service}
+    if args.severity:
+        args.severity = {severity.lower() for severity in args.severity}
+
 # Function used by analzye command
 def analzye(args):
+
+    _process_args(args)
     _print_verbose(args)
-    data = FileLogReader(Path(args.log).resolve(), args.verbose) if args.log else StdinLogReader(args.verbose)
+
+    # Create reader object
+    reader = FileLogReader(Path(args.log).resolve(), args.verbose) if args.log else StdinLogReader(args.verbose)
+    
+    # Apply filters
+    data = reader
+    data = filter_by_service(data, args.service)
+    data = filter_by_severity(data, args.severity)
+    data = filter_since(data, args.since)
+    data = filter_until(data, args.until)
+
     for row in data:
         print(row)
-    print(f"Error Info:\n\tParse Errors: {data.parse_errors}\n\tInvalid Records: {data.invalid_records}")
+    print(f"Error Info:\n\tParse Errors: {reader.parse_errors}\n\tInvalid Records: {reader.invalid_records}")
     
     
 
