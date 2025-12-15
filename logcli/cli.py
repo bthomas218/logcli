@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-from reader import *
+from reader import FileLogReader, StdinLogReader
 
 # Definition for main CLI
 parser = argparse.ArgumentParser(prog="logcli", description="A tool that analyzes logs")
@@ -30,12 +30,11 @@ def _print_verbose(args):
 # Function used by analzye command
 def analzye(args):
     _print_verbose(args)
-    data = read_file(Path(args.log).resolve(), args.verbose) if args.log else read_stdin()
-    try:
-        while True:
-            print(next(data))
-    except StopIteration as e:
-        print(e.value)
+    data = FileLogReader(Path(args.log).resolve(), args.verbose) if args.log else StdinLogReader(args.verbose)
+    for row in data:
+        print(row)
+    print(f"Error Info:\n\tParse Errors: {data.parse_errors}\n\tInvalid Records: {data.invalid_records}")
+    
     
 
 analyze_parser = subparsers.add_parser('analyze', help='perform analysis on a log file')
