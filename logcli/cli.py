@@ -4,32 +4,33 @@ from reader import *
 
 # Definition for main CLI
 parser = argparse.ArgumentParser(prog="logcli", description="A tool that analyzes logs")
+parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
 
 # Defintion for subcommands
 subparsers = parser.add_subparsers(dest='command', help='Available commands')
 
-# Defintion for the analyze command
+
+# Verbose output for analyze command
+def _print_verbose(args):
+    if not args.verbose:
+        return
+    output = args.output or "table"
+
+    messages = [
+        f"Analyzing log: {args.log}" if args.log else "Analyzing logs from stdin",
+        *((f"Since time: {args.since}",) if args.since else ()),
+        *((f"Until time: {args.until}",) if args.until else ()),
+        *((f"With severity: {args.severity}",) if args.severity else ()),
+        *((f"From services: {args.service}",) if args.service else ()),
+        f"With output: {output}",
+    ]
+
+    print("\n".join(messages))
+
+# Function used by analzye command
 def analzye(args):
-    data = iter(set())
-    if args.log:
-        print(f"Analyzing log: {args.log}")
-        data = read_file(Path(args.log).resolve())
-    else:
-        print("Analyzing logs from stdin")
-        data = read_stdin()
-    if args.since:
-        print(f"Since time: {args.since}")
-    if args.until:
-        print(f"Until time: {args.until}")
-    if args.severity:
-        print(f"With severity: {args.severity}")
-    if args.service:
-        print(f"From services: {args.service}")
-    if args.output:
-        print(f"With output: {args.output}")
-    else:
-        print(f"With output: table")
-    
+    _print_verbose(args)
+    data = read_file(Path(args.log).resolve(), args.verbose) if args.log else read_stdin()
     try:
         while True:
             print(next(data))

@@ -27,6 +27,8 @@ Log Analyzer &amp; Monitoring CLI
 - latency_ms (Optional)
 - message
 
+All other fields will be ignored
+
 ### Input format
 
 JSON Lines (.jsonl): one JSON object per line.
