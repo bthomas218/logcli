@@ -30,6 +30,7 @@ Log Analyzer &amp; Monitoring CLI
 ### Input format
 
 JSON Lines (.jsonl): one JSON object per line.
+stdin: one JSON object per line
 
 ### Commands
 

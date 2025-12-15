@@ -13,11 +13,13 @@ def analzye(args):
     if args.log:
         print(f"Analyzing log: {args.log}")
         data = read_file(Path(args.log).resolve())
-        print(data)
+        for obj in data:
+            print(obj)
     else:
         print("Analyzing logs from stdin")
         data = read_stdin()
-        print(data)
+        for obj in data:
+            print(obj)
     if args.since:
         print(f"Since time: {args.since}")
     if args.until:
