@@ -1,5 +1,6 @@
-
 import argparse
+from pathlib import Path
+from reader import *
 
 # Definition for main CLI
 parser = argparse.ArgumentParser(prog="logcli", description="A tool that analyzes logs")
@@ -9,7 +10,14 @@ subparsers = parser.add_subparsers(dest='command', help='Available commands')
 
 # Defintion for the analyze command
 def analzye(args):
-    print(f"Analyzing log: {args.log}")
+    if args.log:
+        print(f"Analyzing log: {args.log}")
+        data = read_file(Path(args.log).resolve())
+        print(data)
+    else:
+        print("Analyzing logs from stdin")
+        data = read_stdin()
+        print(data)
     if args.since:
         print(f"Since time: {args.since}")
     if args.until:
@@ -25,7 +33,7 @@ def analzye(args):
     
 
 analyze_parser = subparsers.add_parser('analyze', help='perform analysis on a log file')
-analyze_parser.add_argument("log", help="The name/path of the logs to analyze")
+analyze_parser.add_argument("log", nargs='?', help="The name/path of the logs to analyze",)
 analyze_parser.add_argument("--since", type=str, help="Filter logs since this timestamp, input as a string")
 analyze_parser.add_argument("--until", type=str, help="Filter logs up until this timestamp, input as a string")
 analyze_parser.add_argument("--severity", nargs="+", help="Filter logs that contain these levels of severity")

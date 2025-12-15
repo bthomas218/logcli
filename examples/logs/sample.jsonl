@@ -1,0 +1,2 @@
+{ "timestamp": "2025-01-01T12:34:56.789Z", "service": "payments-api", "severity": "ERROR", "message": "Payment failed", "latency_ms": 123, "trace_id": "abc-123","extra": { "user_id": 42 } }
+{ foo: bar }
