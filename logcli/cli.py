@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from reader import FileLogReader, StdinLogReader
 from filters import filter_by_service, filter_by_severity, filter_until, filter_since
+from metrics import *
 
 
 # Definition for main CLI
@@ -65,8 +66,10 @@ def analzye(args):
     data = filter_since(data, args.since)
     data = filter_until(data, args.until)
 
-    for row in data:
-        print(row)
+    agg = StatsAggregator()
+    agg.consume(data)
+    stats = agg.to_dict()
+    print(stats)
     print(f"Error Info:\n\tParse Errors: {reader.parse_errors}\n\tInvalid Records: {reader.invalid_records}")
     
     
