@@ -10,16 +10,13 @@ subparsers = parser.add_subparsers(dest='command', help='Available commands')
 
 # Defintion for the analyze command
 def analzye(args):
+    data = iter(set())
     if args.log:
         print(f"Analyzing log: {args.log}")
         data = read_file(Path(args.log).resolve())
-        for obj in data:
-            print(obj)
     else:
         print("Analyzing logs from stdin")
         data = read_stdin()
-        for obj in data:
-            print(obj)
     if args.since:
         print(f"Since time: {args.since}")
     if args.until:
@@ -32,6 +29,12 @@ def analzye(args):
         print(f"With output: {args.output}")
     else:
         print(f"With output: table")
+    
+    try:
+        while True:
+            print(next(data))
+    except StopIteration as e:
+        print(e.value)
     
 
 analyze_parser = subparsers.add_parser('analyze', help='perform analysis on a log file')
