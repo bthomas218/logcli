@@ -50,8 +50,8 @@ def _process_args(args):
     if args.severity:
         args.severity = {severity.lower() for severity in args.severity}
 
-# Function used by analzye command
-def analzye(args):
+# Function used by analyze command
+def analyze(args):
 
     _process_args(args)
     _print_verbose(args)
@@ -81,7 +81,7 @@ analyze_parser.add_argument("--until", type=str, help="Filter logs up until this
 analyze_parser.add_argument("--severity", nargs="+", help="Filter logs that contain these levels of severity")
 analyze_parser.add_argument("--service", nargs="+", help="Filter logs that come from these services")
 analyze_parser.add_argument("--output", choices=["table", "json"], help="Format analysis according to this output, defaults to table")
-analyze_parser.set_defaults(function=analzye)
+analyze_parser.set_defaults(function=analyze)
 
 
 
