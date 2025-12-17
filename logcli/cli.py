@@ -18,8 +18,10 @@ analyze_parser.add_argument("--service", nargs="+", help="Filter logs that come 
 analyze_parser.add_argument("--output", choices=["table", "json"], help="Format analysis according to this output, defaults to table")
 analyze_parser.set_defaults(function=analyze.analyze)
 
-
-
+# Watch command
+watch_parser = subparsers.add_parser('watch', help="Evaluates log data over a sliding time window and triggers alerts based on rules defined in a config file")
+watch_parser.add_argument("log", nargs='?', help="The name/path of the logs to watch")
+watch_parser.add_argument("--config", "--c", required=True, help="The name/path of the config file")
 
 # Run the program
 args = parser.parse_args()
