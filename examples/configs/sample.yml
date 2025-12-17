@@ -3,7 +3,7 @@ window_minutes: 5
 alerts:
   - name: high_error_rate
     type: error_rate
-    threshold: 5 # percent
+    threshold: 0.05 # percent
 
   - name: high_latency
     type: p95_latency

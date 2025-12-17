@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from reader import FileLogReader, StdinLogReader
+from dataclasses import dataclass
 from filters import filter_since
 from metrics import *
 
@@ -10,9 +11,9 @@ from metrics import *
 ALERT_TYPES = ["error_rate", "p95_latency"]
 
 def watch(args):
-    cfg = _parse_cfg(Path(args.config).resolve())
-    _validate_cfg(cfg)
-    duration = datetime.now(timezone.utc) - timedelta(minutes=cfg.get("window_minutes"))
+    raw = _parse_cfg(Path(args.config).resolve())
+    cfg = _validate_cfg(raw)
+    duration = datetime.now(timezone.utc) - timedelta(minutes=cfg.window_minutes)
     
     reader = FileLogReader(Path(args.log).resolve(), args.verbose) if args.log else StdinLogReader(args.verbose)
 
@@ -23,8 +24,20 @@ def watch(args):
     agg = StatsAggregator()
     agg.consume(data)
     stats = agg.to_dict()
-    
+
     print(stats)
+
+@dataclass
+class AlertRule:
+    name: str
+    type: str
+    threshold: float | int
+
+@dataclass
+class WatchConfig:
+    window_minutes: int
+    alerts: list[AlertRule]
+
 
 def _parse_cfg(cfg: Path):
     try:
@@ -52,6 +65,8 @@ def _validate_cfg(cfg: dict | None):
         print("Error: Config file is missing or invalid 'alerts' field", file=sys.stderr)
         exit(2)
 
+    alerts = []
+
     for alert in cfg.get("alerts"):
         if not isinstance(alert.get("name"), str):
             print("Error: An alert is missing or has an invalid 'name' field", file=sys.stderr)
@@ -60,6 +75,10 @@ def _validate_cfg(cfg: dict | None):
         if alert.get("type") not in ALERT_TYPES:
             print(f"Error: Alert '{alert_name}' has invalid type", file=sys.stderr)
             exit(2)
-        if not isinstance(alert.get("threshold"), int):
+        if not isinstance(alert.get("threshold"), int | float):
             print(f"Error: Alert '{alert_name}' has missing or invalid 'threshold' field", file=sys.stderr)
             exit(2)
+        alert = AlertRule(alert_name, alert.get("type"), alert.get("threshold"))
+        alerts.append(alert)
+    
+    return WatchConfig(cfg.get("window_minutes"), alerts)
