@@ -24,7 +24,7 @@ class StatsAggregator():
         self.total = 0
         self.by_severity = {}
         self.by_service = {}
-        self.latency_count = 0
+        self.latencies = []
         self.latency_min = None
         self.latency_max = None
         self.latency_sum = 0
@@ -62,7 +62,7 @@ class StatsAggregator():
 
             latency = row.get("latency_ms")
             if isinstance(latency, (int, float)):
-                self.latency_count += 1
+                self.latencies.append(latency)
                 self.latency_sum += latency
                 self.latency_min = latency if self.latency_min is None else min(latency, self.latency_min)
                 self.latency_max = latency if self.latency_max is None else max(latency, self.latency_max)
@@ -80,8 +80,9 @@ class StatsAggregator():
                 "avg" is None if no latency records were processed.
             - "error_rate" (float): Contains the error rate if logs with severity 'error' were present
         """
-        avg = self.latency_sum / self.latency_count if self.latency_count else None
+        avg = self.latency_sum / len(self.latencies) if self.latencies else None
         error_rate = self.by_severity.get("error") / self.total if "error" in self.by_severity else None
+        p95_latency = self._get_percentile(0.95)
         return {
             "total" : self.total,
             "time_range": {
@@ -92,9 +93,19 @@ class StatsAggregator():
             "service_counts": self.by_service,
             "severity_counts": self.by_severity,
             "latency_ms": {
-                "count": self.latency_count,
+                "count": len(self.latencies),
                 "min": self.latency_min,
                 "max": self.latency_max,
-                "avg": avg
+                "avg": avg,
+                "p95": p95_latency
             }
         }
+    
+    def _get_percentile(self, p: int):
+        if not self.latencies:
+            return None
+        self.latencies = sorted(self.latencies)
+        k = int(round((p / 100) * (len(self.latencies) - 1)))
+        return self.latencies[k]
+        
+
