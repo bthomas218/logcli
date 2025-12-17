@@ -1,5 +1,5 @@
 import argparse
-from handlers import analyze
+from handlers import analyze, watch
 
 # Definition for main CLI
 parser = argparse.ArgumentParser(prog="logcli", description="A tool that analyzes logs")
@@ -21,7 +21,8 @@ analyze_parser.set_defaults(function=analyze.analyze)
 # Watch command
 watch_parser = subparsers.add_parser('watch', help="Evaluates log data over a sliding time window and triggers alerts based on rules defined in a config file")
 watch_parser.add_argument("log", nargs='?', help="The name/path of the logs to watch")
-watch_parser.add_argument("--config", "--c", required=True, help="The name/path of the config file")
+watch_parser.add_argument("--config", "-c", required=True, help="The name/path of the config file")
+watch_parser.set_defaults(function=watch.watch)
 
 # Run the program
 args = parser.parse_args()
