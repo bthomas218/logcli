@@ -29,7 +29,15 @@ def watch(args):
     agg.consume(data)
     stats = agg.to_dict()
 
-    print(stats)
+    # Check to see if alerts fired
+    messages = _eval_alerts(stats, cfg)
+    if messages: 
+        for msg in messages:
+            print(f"ALERT: {msg}", file=sys.stderr)
+        exit(1)
+    else:
+        print("OK", file=sys.stderr)
+    
 
 @dataclass
 class AlertRule:
@@ -108,3 +116,39 @@ def _validate_cfg(cfg: dict | None) -> WatchConfig:
         alerts.append(alert)
     
     return WatchConfig(cfg.get("window_minutes"), alerts)
+
+def _eval_alerts(stats: dict, cfg: WatchConfig) -> list[str]:
+    """
+    Evaluates if any alerts went off
+    
+    :param stats: aggregation stats to check
+    :type stats: dict
+    :param cfg: Configuration rules
+    :type cfg: WatchConfig
+    :return: A list of messages of alerts that went off
+    :rtype: list[str]
+    """
+
+    messages = []
+    for rule in cfg.alerts:
+
+        match(rule.type):
+            case "error_rate":
+                er = stats["error_rate"]
+                if er is None:
+                    continue
+                if er >= rule.threshold:
+                    messages.append(f"[{rule.name}] error_rate={er*100:.2f}% > threshold={rule.threshold:.2f}%")
+            case "p95_latency":
+                er = stats["latency_ms"].get("p95")
+                if er is None:
+                    continue
+                if er > rule.threshold:
+                    messages.append(f"[{rule.name}] p95_latency={er:.2f}ms > threshold={rule.threshold:.2f}ms")
+            case _:
+                continue
+    
+    return messages
+
+
+
