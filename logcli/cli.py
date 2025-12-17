@@ -4,7 +4,7 @@ from datetime import datetime
 from reader import FileLogReader, StdinLogReader
 from filters import filter_by_service, filter_by_severity, filter_until, filter_since
 from metrics import *
-from output import outputTable 
+from output import *
 
 
 # Definition for main CLI
@@ -50,6 +50,7 @@ def _process_args(args):
         args.service = {service.lower() for service in args.service}
     if args.severity:
         args.severity = {severity.lower() for severity in args.severity}
+    args.output = args.output if args.output else "table"
 
 # Function used by analyze command
 def analyze(args):
@@ -70,7 +71,16 @@ def analyze(args):
     agg = StatsAggregator()
     agg.consume(data)
     stats = agg.to_dict()
-    print(outputTable(stats, reader))
+    
+    # Print output to stdout
+    match args.output:
+        case "table":
+            print(output_table(stats, reader))
+        case "json":
+            print(output_json(stats, reader))
+        case _:
+            print("Error: Invalid output format")
+            exit(1)
     
     
 
