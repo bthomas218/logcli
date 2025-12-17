@@ -4,6 +4,7 @@ from datetime import datetime
 from reader import FileLogReader, StdinLogReader
 from filters import filter_by_service, filter_by_severity, filter_until, filter_since
 from metrics import *
+from output import outputTable 
 
 
 # Definition for main CLI
@@ -69,8 +70,7 @@ def analyze(args):
     agg = StatsAggregator()
     agg.consume(data)
     stats = agg.to_dict()
-    print(stats)
-    print(f"Error Info:\n\tParse Errors: {reader.parse_errors}\n\tInvalid Records: {reader.invalid_records}")
+    print(outputTable(stats, reader))
     
     
 
