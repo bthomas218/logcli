@@ -1,19 +1,30 @@
 import yaml
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from reader import FileLogReader, StdinLogReader
-from filters import filter_until, filter_since
+from filters import filter_since
 from metrics import *
 
 
 ALERT_TYPES = ["error_rate", "p95_latency"]
 
 def watch(args):
-    data = _parse_cfg(Path(args.config).resolve())
-    _validate_cfg(data)
-    print(data)
+    cfg = _parse_cfg(Path(args.config).resolve())
+    _validate_cfg(cfg)
+    duration = datetime.now(timezone.utc) - timedelta(minutes=cfg.get("window_minutes"))
+    
+    reader = FileLogReader(Path(args.log).resolve(), args.verbose) if args.log else StdinLogReader(args.verbose)
 
+    data = reader
+    
+    data = filter_since(data, duration)
+    
+    agg = StatsAggregator()
+    agg.consume(data)
+    stats = agg.to_dict()
+    
+    print(stats)
 
 def _parse_cfg(cfg: Path):
     try:
