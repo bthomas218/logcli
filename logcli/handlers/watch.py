@@ -11,16 +11,20 @@ from metrics import *
 ALERT_TYPES = ["error_rate", "p95_latency"]
 
 def watch(args):
-    raw = _parse_cfg(Path(args.config).resolve())
+
+    # Get the configuration
+    raw = _parse_yml(Path(args.config).resolve())
     cfg = _validate_cfg(raw)
-    duration = datetime.now(timezone.utc) - timedelta(minutes=cfg.window_minutes)
     
+    # Read the log json
     reader = FileLogReader(Path(args.log).resolve(), args.verbose) if args.log else StdinLogReader(args.verbose)
 
+    # Apply filters
     data = reader
-    
+    duration = datetime.now(timezone.utc) - timedelta(minutes=cfg.window_minutes)
     data = filter_since(data, duration)
     
+    # Aggregate
     agg = StatsAggregator()
     agg.consume(data)
     stats = agg.to_dict()
@@ -29,19 +33,33 @@ def watch(args):
 
 @dataclass
 class AlertRule:
+    """
+    Represents an alert rule in config file
+
+    :params
+    """
     name: str
     type: str
     threshold: float | int
 
 @dataclass
 class WatchConfig:
+    """
+    Represents the watch configuration
+    """
     window_minutes: int
     alerts: list[AlertRule]
 
 
-def _parse_cfg(cfg: Path):
+def _parse_yml(file: Path):
+    """
+    Parses a yaml file 
+    
+    :param file: The yml file to parse
+    :type file: Path
+    """
     try:
-        with cfg.open(mode='r', encoding="utf-8") as f:
+        with file.open(mode='r', encoding="utf-8") as f:
             data = yaml.safe_load(f) 
             return data
     except yaml.YAMLError as e:
@@ -54,7 +72,15 @@ def _parse_cfg(cfg: Path):
         print(f"An unexpected error occurred: {e}", file=sys.stderr)
         exit(1)
 
-def _validate_cfg(cfg: dict | None):
+def _validate_cfg(cfg: dict | None) -> WatchConfig:
+    """
+    Validates a possible config object against the schema
+    
+    :param cfg: A possible config object to validate
+    :type cfg: dict | None
+    :return: The configuration object
+    :rtype: WatchConfig
+    """
     if not isinstance(cfg, dict):
         print("Error: Config is missing", file=sys.stderr)
         exit(2)

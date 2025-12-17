@@ -11,7 +11,7 @@ class StatsAggregator():
     - total (int): Total number of records processed.
     - by_severity (dict): Count of records for each severity level (lowercase keys).
     - by_service (dict): Count of records for each service (lowercase keys).
-    - latency_count (int): Number of records with valid latency values.
+    - latencies (list): All latencies from records that have them
     - latency_min (float | None): Minimum latency observed, or None if no latencies processed.
     - latency_max (float | None): Maximum latency observed, or None if no latencies processed.
     - latency_sum (float): Sum of all latency values.
@@ -76,7 +76,7 @@ class StatsAggregator():
             - "time_range" (dict): Contains "start" and "end" timestamps.
             - "service_counts" (dict): Count by service name (lowercase keys).
             - "severity_counts" (dict): Count by severity level (lowercase keys).
-            - "latency_ms" (dict): Contains "count", "min", "max", and "avg".
+            - "latency_ms" (dict): Contains "count", "min", "max", "avg", and "p95".
                 "avg" is None if no latency records were processed.
             - "error_rate" (float): Contains the error rate if logs with severity 'error' were present
         """
@@ -102,6 +102,12 @@ class StatsAggregator():
         }
     
     def _get_percentile(self, p: int):
+        """
+        Calculates the percentile from latencies in the aggregator
+        
+        :param p: The percentile to calculate
+        :type p: int
+        """
         if not self.latencies:
             return None
         self.latencies = sorted(self.latencies)
