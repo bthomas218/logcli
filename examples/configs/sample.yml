@@ -7,4 +7,4 @@ alerts:
 
   - name: high_latency
     type: p95_latency
-    threshold: 500 # ms
+    threshold: 100 # ms

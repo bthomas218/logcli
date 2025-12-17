@@ -77,8 +77,8 @@ class FileLogReader(LogReader):
         verbose = self.verbose
 
         if file.suffix != ".jsonl":
-            print(f"Error: unsupported file type '{file.suffix}'")
-            exit(1)
+            print(f"Error: unsupported file type '{file.suffix}'", file=sys.stderr)
+            exit(2)
 
         try:
             with file.open(mode='r', encoding='utf-8') as f:
@@ -101,10 +101,10 @@ class FileLogReader(LogReader):
                     line_number += 1
 
         except FileNotFoundError:
-            print(f"Error: The file '{file}' was not found")
-            exit(1)
+            print(f"Error: The file '{file}' was not found", file=sys.stderr)
+            exit(2)
         except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+            print(f"An unexpected error occurred: {e}", file=sys.stderr)
             exit(1)
 
 class StdinLogReader(LogReader):

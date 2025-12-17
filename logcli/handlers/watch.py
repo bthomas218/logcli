@@ -1,4 +1,5 @@
 import yaml
+import sys
 from pathlib import Path
 from datetime import datetime
 from reader import FileLogReader, StdinLogReader
@@ -17,31 +18,37 @@ def watch(args):
 def _parse_cfg(cfg: Path):
     try:
         with cfg.open(mode='r', encoding="utf-8") as f:
-             data = yaml.safe_load(f) 
-             return data
+            data = yaml.safe_load(f) 
+            return data
     except yaml.YAMLError as e:
-         print("Error while parsing YAML file")
+         print("Error while parsing YAML file",  file=sys.stderr)
          exit(2)
     except FileNotFoundError:
-        print("Error: config file not found")
+        print("Error: config file not found", file=sys.stderr)
+        exit(2)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}", file=sys.stderr)
+        exit(1)
+
+def _validate_cfg(cfg: dict | None):
+    if not isinstance(cfg, dict):
+        print("Error: Config is missing", file=sys.stderr)
+        exit(2)
+    if not isinstance(cfg.get("window_minutes"), int):
+        print("Error: Config file is missing or invalid 'window_minutes' field", file=sys.stderr)
+        exit(2)
+    if not isinstance(cfg.get("alerts"), list):
+        print("Error: Config file is missing or invalid 'alerts' field", file=sys.stderr)
         exit(2)
 
-def _validate_cfg(cfg: dict):
-    if not isinstance(cfg["window_minutes"], int):
-        print("Error: Config file is missing or invalid 'window_minutes' field")
-        exit(2)
-    if not isinstance(cfg['alerts'], list):
-        print("Error: Config file is missing or invalid 'alerts' field")
-        exit(2)
-
-    for alert in cfg['alerts']:
-        if not isinstance(alert["name"], str):
-            print("Error: An alert is missing or has an invalid 'name' field")
+    for alert in cfg.get("alerts"):
+        if not isinstance(alert.get("name"), str):
+            print("Error: An alert is missing or has an invalid 'name' field", file=sys.stderr)
             exit(2)
-        alert_name = alert["name"]
-        if alert["type"] not in ALERT_TYPES:
-            print(f"Error: Alert '{alert_name}' has invalid type")
+        alert_name = alert.get("name")
+        if alert.get("type") not in ALERT_TYPES:
+            print(f"Error: Alert '{alert_name}' has invalid type", file=sys.stderr)
             exit(2)
-        if not isinstance(alert["threshold"], int):
-            print(f"Error: Alert '{alert_name}' has missing or invalid 'threshold' field")
+        if not isinstance(alert.get("threshold"), int):
+            print(f"Error: Alert '{alert_name}' has missing or invalid 'threshold' field", file=sys.stderr)
             exit(2)

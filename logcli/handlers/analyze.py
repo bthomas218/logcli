@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from datetime import datetime
 from reader import FileLogReader, StdinLogReader
@@ -28,13 +29,13 @@ def _process_args(args):
         try:
             args.since = datetime.fromisoformat(args.since)
         except ValueError:
-            print("Error: Invalid timestamp for since flag")
+            print("Error: Invalid timestamp for since flag", file=sys.stderr)
             exit(1)
     if args.until:
         try:
             args.until = datetime.fromisoformat(args.until)
         except ValueError:
-            print("Error: Invalid timestamp for until flag")
+            print("Error: Invalid timestamp for until flag", file=sys.stderr)
             exit(1)
     if args.service:
         args.service = {service.lower() for service in args.service}
@@ -69,7 +70,7 @@ def analyze(args):
         case "json":
             print(output_json(stats, reader))
         case _:
-            print("Error: Invalid output format")
-            exit(1)
+            print("Error: Invalid output format", file=sys.stderr)
+            exit(2)
     
     
