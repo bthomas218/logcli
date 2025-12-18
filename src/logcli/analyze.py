@@ -1,10 +1,10 @@
 import sys
 from pathlib import Path
 from datetime import datetime
-from reader import FileLogReader, StdinLogReader
-from filters import filter_by_service, filter_by_severity, filter_until, filter_since
-from metrics import *
-from output import *
+from .reader import FileLogReader, StdinLogReader
+from .filters import filter_by_service, filter_by_severity, filter_until, filter_since
+from .metrics import *
+from .output import *
 
 # Verbose output for analyze command
 def _print_verbose(args):

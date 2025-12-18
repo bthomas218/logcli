@@ -2,10 +2,10 @@ import yaml
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
-from reader import FileLogReader, StdinLogReader
+from .reader import FileLogReader, StdinLogReader
 from dataclasses import dataclass
-from filters import filter_since
-from metrics import *
+from .filters import filter_since
+from .metrics import *
 
 
 ALERT_TYPES = ["error_rate", "p95_latency"]
