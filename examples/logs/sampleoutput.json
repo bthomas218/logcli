@@ -1,0 +1,24 @@
+{
+  "total": 1,
+  "time_range": {
+    "start": "2025-01-01T12:34:56.789000+00:00",
+    "end": "2025-01-01T12:34:56.789000+00:00"
+  },
+  "error_rate": 1.0,
+  "service_counts": {
+    "payments-api": 1
+  },
+  "severity_counts": {
+    "error": 1
+  },
+  "latency_ms": {
+    "count": 1,
+    "min": 123,
+    "max": 123,
+    "avg": 123.0
+  },
+  "error_info": {
+    "parse_errors": 1,
+    "invalid_records": 1
+  }
+}
