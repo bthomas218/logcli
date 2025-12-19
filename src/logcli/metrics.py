@@ -82,7 +82,7 @@ class StatsAggregator():
         """
         avg = self.latency_sum / len(self.latencies) if self.latencies else None
         error_rate = self.by_severity.get("error") / self.total if "error" in self.by_severity else None
-        p95_latency = self._get_percentile(0.95)
+        p95_latency = self._get_percentile(95)
         return {
             "total" : self.total,
             "time_range": {
